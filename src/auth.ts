@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 import connectDB from "./lib/db"
 import User from "./models/user.model"
 import bcrypt from "bcryptjs"
-import { use } from "react"
+import Google from "next-auth/providers/google"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -43,16 +43,58 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
             },
         }),
+        Google({
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET
+        })
     ],
     callbacks: {
-        async jwt({ token, user }) {
-            token.id = user.id,
-            token.name = user.name,
-            token.email = user.email,
-            token.role = user.role
+        async signIn({ user, account }) {
+            if (account?.provider == "google") {
+                await connectDB()
+                const dbUser = await User.findOne({ email: user.email })
 
+                if (!dbUser) {
+                    await User.create({
+                        name: user.name,
+                        email: user.email
+                    })
+                }
+                user.id = dbUser._id
+                user.role = dbUser.role
+            }
+            return true
+        },
+
+        async jwt({ token, user }) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+            token.id = user.id,
+                token.name = user.name,
+                token.email = user.email,
+                token.role = user.role
             return token
+        },
+        async session({ token, session }) {
+
+            if (session.user) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                session.user.id = token.id as string,
+                    session.user.name = token.name,
+                    session.user.email = token.email as string,
+                    session.user.role = token.role as string
+            }
+            return session
+
         }
 
-    }
+    },
+    pages: {
+        signIn: "/signin",
+        error: "/signin"
+    },
+    session: {
+        strategy: "jwt",
+        maxAge: 10 * 24 * 60 * 60
+    },
+    secret: process.env.BETTER_AUTH_SECRET
 })
