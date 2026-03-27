@@ -67,11 +67,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
 
         async jwt({ token, user }) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            token.id = user.id,
-                token.name = user.name,
-                token.email = user.email,
-                token.role = user.role
+            if (user) {
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                token.id = user.id,
+                    token.name = user.name,
+                    token.email = user.email,
+                    token.role = user.role
+            }
             return token
         },
         async session({ token, session }) {

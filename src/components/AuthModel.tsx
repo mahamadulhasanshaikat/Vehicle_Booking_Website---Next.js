@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { CircleDashed, Lock, Mail, User, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { signIn, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -18,17 +19,17 @@ const AuthModel = ({ open, onClose }: propType) => {
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState('')
 
+  const {data} = useSession()
+  console.log(data)
+
   const handleSignUp = async () => {
     setLoading(true)
     try {
       const { data } = await axios.post('/api/auth/register', {
         name, email, password
       })
-
       console.log(data)
       setLoading(false)
-
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setLoading(false)
@@ -36,6 +37,21 @@ const AuthModel = ({ open, onClose }: propType) => {
 
     }
   }
+
+  const handleLogin = async () => {
+    setLoading(true)
+    const res = await signIn("credentials", {
+      email, password, redirect: false
+    })
+    setLoading(false)
+    console.log(res)
+  }
+
+  const handleGoogleLogin = async ()=>{
+    
+  }
+
+
 
   return (
     <AnimatePresence>
@@ -106,8 +122,11 @@ const AuthModel = ({ open, onClose }: propType) => {
                           />
                         </div>
 
-                        <button className=' w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition'>
-                          Login
+                        <button className=' w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center'
+                          //  disabled={loading}
+                          onClick={handleLogin}
+                        >
+                          {!loading ? " Login" : <CircleDashed size={18} color='white' className=' animate-spin' />}
                         </button>
                       </div>
                       <p className='mt-6 text-center text-sm text-gray-500'> Don&apos;t have an account? <div onClick={() => setStep('signup')} className="text-black font-medium hover:underline">Sign Up</div></p>
