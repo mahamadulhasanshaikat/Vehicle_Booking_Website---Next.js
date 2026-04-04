@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useState } from "react"
 import AuthModel from "./AuthModel"
-import { useSelector } from "react-redux"
-import { RootState } from "@/redux/store"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "@/redux/store"
+import { Bike, Car, ChevronRight, LogOut, Truck } from "lucide-react"
+import { signOut } from "next-auth/react"
+import { setUserData } from "@/redux/userSlice"
 
 const Nav_Items = ["Home", "Booking", "About Us", "Contect"]
 
@@ -15,6 +18,13 @@ const Nav = () => {
   const [authOpen, setAuthOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const { userData } = useSelector((state: RootState) => state.user)
+  const dispatch = useDispatch<AppDispatch>()
+
+  const handleLogOut = async () => {
+    await signOut({ redirect: false })
+    dispatch(setUserData(null))
+    setProfileOpen(false)
+  }
   return (
     <>
       <motion.div
@@ -67,12 +77,34 @@ const Nav = () => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className=" absolute top-14 right-0 w-[300px] bg-white text-black rounded-2xl shadow-xl border"
+                        className=" absolute top-14 right-0 w-75 bg-white text-black rounded-2xl shadow-xl border"
                       >
 
                         <div className="p-5">
                           <p className="font-semibold text-lg">{userData.name}</p>
                           <p className="text-xs uppercase text-gray-500 mb-4">{userData.role}</p>
+
+                          {userData.role != 'partner' && (
+                            <div className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl">
+
+                              <div className="flex -space-x-2">
+                                <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center"> <Bike size={14} /></div>
+                                <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center"><Car size={14} /></div>
+                                <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center"> <Truck size={14} /></div>
+
+                              </div>
+                              Become a Partner
+                              <ChevronRight size={16} className="ml-auto" />
+
+                            </div>
+                          )
+                          }
+                          <button className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl mt-2"
+                            onClick={handleLogOut}
+                          >
+                            <LogOut size={16} />
+                            Logout
+                          </button>
                         </div>
 
                       </motion.div>
