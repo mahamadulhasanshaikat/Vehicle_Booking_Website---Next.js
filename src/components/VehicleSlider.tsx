@@ -60,9 +60,17 @@ const VehicleSlider = () => {
               <ChevronRight size={18} strokeWidth={2.5} />
             </motion.div>
           </div>
-
-
         </motion.div>
+
+        <div className=' relative'>
+          <div
+            className=' flex gap-5 pt-20 overflow-auto scroll-smooth pb-4 px-1'
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+
+          </div>
+
+        </div>
       </div>
     </div>
   )
